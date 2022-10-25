@@ -57,9 +57,9 @@ else
 fi
 
 echo '[INSTALL] Installing Requirements'
-pip install -r requirements.txt
+pip install -r requirements_setup.txt
 echo 'Collect static files'
-python manage.py collectstatic
+python manage.py collectstatic --noinput
 echo '[INSTALL] Migrating Database'
 python manage.py makemigrations
 python manage.py migrate
