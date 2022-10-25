@@ -91,6 +91,9 @@
                         <li class="sidebar-item"><a href="{% url 'nodejsscan:nodejsscan_list' %}" class="sidebar-link"><i
                                 class="fas fa-random"></i><span class="hide-menu">Nodejs Scan </span></a>
                         </li>
+                        <li class="sidebar-item"><a href="{% url 'semgrepscan:semgrepscan_list' %}" class="sidebar-link"><i
+                                class="fas fa-random"></i><span class="hide-menu">semgrep Scan </span></a>
+                        </li>
                         <li class="sidebar-item"><a href="{% url 'tfsec:tfsec_list' %}" class="sidebar-link"><i
                                 class="fas fa-book"></i><span class="hide-menu">tfsec Scan </span></a>
                         </li>
@@ -99,6 +102,15 @@
                         </li>
                         <li class="sidebar-item"><a href="{% url 'checkmarx:checkmarx_list' %}" class="sidebar-link"><i
                                 class="fas fa-book"></i><span class="hide-menu">Checkmarx Scan </span></a>
+                        </li>
+                        <li class="sidebar-item"><a href="{% url 'gitlabsast:gitlabsast_list' %}" class="sidebar-link"><i
+                                class="fas fa-book"></i><span class="hide-menu">GitLab SAST Scan </span></a>
+                        </li>
+                        <li class="sidebar-item"><a href="{% url 'gitlabcontainerscan:gitlabcontainerscan_list' %}" class="sidebar-link"><i
+                                class="fas fa-book"></i><span class="hide-menu">GitLab Container Scan </span></a>
+                        </li>
+                        <li class="sidebar-item"><a href="{% url 'gitlabsca:gitlabsca_list' %}" class="sidebar-link"><i
+                                class="fas fa-book"></i><span class="hide-menu">GitLab Dependency Scan </span></a>
                         </li>
                     </ul>
                 </li>

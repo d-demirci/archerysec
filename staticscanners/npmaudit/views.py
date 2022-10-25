@@ -14,7 +14,7 @@
 #
 # This file is part of ArcherySec Project.
 
-from django.shortcuts import render, render_to_response, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render,  HttpResponse, HttpResponseRedirect
 from staticscanners.models import npmaudit_scan_results_db, npmaudit_scan_db
 import hashlib
 from staticscanners.resources import NpmauditResource
@@ -42,7 +42,13 @@ def list_vuln(request):
     else:
         scan_id = None
 
-    npmaudit_all_vuln = npmaudit_scan_results_db.objects.filter(username=username, scan_id=scan_id)
+    npmaudit_all_vuln = npmaudit_scan_results_db.objects.filter(username=username, scan_id=scan_id).values(
+        'title',
+        'severity',
+        'scan_id',
+        'vuln_status',
+        'vul_col',
+    ).distinct().exclude(vuln_status='Duplicate')
 
     return render(request, 'npmaudit/npmaudit_list_vuln.html',
                   {'npmaudit_all_vuln': npmaudit_all_vuln}
@@ -104,7 +110,7 @@ def npmaudit_vuln_data(request):
             SEVERITY_HIGH=total_high,
             SEVERITY_MEDIUM=total_medium,
             SEVERITY_LOW=total_low,
-            total_dup=total_duplicate
+
         )
 
         return HttpResponseRedirect(
@@ -212,7 +218,7 @@ def npmaudit_del_vuln(request):
             SEVERITY_HIGH=total_high,
             SEVERITY_MEDIUM=total_medium,
             SEVERITY_LOW=total_low,
-            total_dup=total_duplicate
+
         )
 
         return HttpResponseRedirect(reverse('npmaudit:npmaudit_all_vuln') + '?scan_id=%s' % scan_id)

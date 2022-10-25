@@ -14,7 +14,7 @@
 #
 # This file is part of ArcherySec Project.
 
-from django.shortcuts import render, render_to_response, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render,  HttpResponse, HttpResponseRedirect
 from staticscanners.models import bandit_scan_results_db, bandit_scan_db
 import hashlib
 from django.urls import reverse
@@ -56,8 +56,9 @@ def banditscan_list_vuln(request):
         'test_name',
         'issue_severity',
         'scan_id',
+        'vuln_status',
         'vul_col',
-    ).distinct()
+    ).distinct().exclude(vuln_status='Duplicate')
 
     return render(request, 'banditscanner/banditscan_list_vuln.html',
                   {'bandit_all_vuln': bandit_all_vuln,
@@ -120,8 +121,7 @@ def banditscan_vuln_data(request):
             total_vuln=total_vul,
             SEVERITY_HIGH=total_high,
             SEVERITY_MEDIUM=total_medium,
-            SEVERITY_LOW=total_low,
-            total_dup=total_duplicate
+            SEVERITY_LOW=total_low
         )
 
         return HttpResponseRedirect(

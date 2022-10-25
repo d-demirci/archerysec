@@ -14,7 +14,7 @@
 #
 # This file is part of ArcherySec Project.
 
-from django.shortcuts import render, render_to_response, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render,  HttpResponse, HttpResponseRedirect
 from staticscanners.models import checkmarx_scan_results_db, checkmarx_scan_db
 import hashlib
 from staticscanners.resources import checkmarxResource
@@ -47,7 +47,7 @@ def list_vuln(request):
         'name',
         'severity',
         'vul_col',
-        'scan_id').distinct()
+        'scan_id').distinct().exclude(vuln_status='Duplicate')
 
     return render(request, 'checkmarx/checkmarx_list_vuln.html',
                   {'checkmarx_all_vuln': checkmarx_all_vuln}
@@ -108,8 +108,7 @@ def checkmarx_vuln_data(request):
             total_vuln=total_vul,
             SEVERITY_HIGH=total_high,
             SEVERITY_MEDIUM=total_medium,
-            SEVERITY_LOW=total_low,
-            total_dup=total_duplicate
+            SEVERITY_LOW=total_low
         )
 
         return HttpResponseRedirect(
@@ -214,8 +213,7 @@ def checkmarx_del_vuln(request):
             total_vuln=total_vul,
             SEVERITY_HIGH=total_high,
             SEVERITY_MEDIUM=total_medium,
-            SEVERITY_LOW=total_low,
-            total_dup=total_duplicate
+            SEVERITY_LOW=total_low
         )
 
         return HttpResponseRedirect(reverse('checkmarx:checkmarx_all_vuln') + '?scan_id=%s' % scan_id)

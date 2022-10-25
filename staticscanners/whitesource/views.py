@@ -14,7 +14,7 @@
 #
 # This file is part of ArcherySec Project.
 
-from django.shortcuts import render, render_to_response, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render,  HttpResponse, HttpResponseRedirect
 from staticscanners.models import whitesource_scan_results_db, whitesource_scan_db
 import hashlib
 from staticscanners.resources import whitesourceResource
@@ -43,11 +43,12 @@ def list_vuln(request):
         scan_id = None
 
     whitesource_all_vuln = whitesource_scan_results_db.objects.filter(username=username,
-                                                                      scan_id=scan_id, vuln_status='Open').values(
+                                                                      scan_id=scan_id).values(
         'name',
         'severity',
         'vul_col',
-        'scan_id').distinct()
+        'vuln_status',
+        'scan_id').distinct().exclude(vuln_status='Duplicate')
 
     return render(request, 'whitesource/whitesource_list_vuln.html',
                   {'whitesource_all_vuln': whitesource_all_vuln}

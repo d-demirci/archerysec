@@ -46,19 +46,27 @@ from staticscanners.models import dependencycheck_scan_db, \
     npmaudit_scan_results_db, \
     nodejsscan_scan_db, \
     nodejsscan_scan_results_db, \
+    semgrepscan_scan_db, \
+    semgrepscan_scan_results_db, \
     tfsec_scan_db, \
     tfsec_scan_results_db, \
     whitesource_scan_db, \
     whitesource_scan_results_db, \
     checkmarx_scan_db, \
-    checkmarx_scan_results_db
+    checkmarx_scan_results_db, \
+    gitlabsast_scan_db, \
+    gitlabsast_scan_results_db, \
+    gitlabsca_scan_db, \
+    gitlabsca_scan_results_db, \
+    gitlabcontainerscan_scan_db, \
+    gitlabcontainerscan_scan_results_db
 from networkscanners.models import scan_save_db, \
     nessus_scan_db, \
     ov_scan_result_db, \
     nessus_report_db
 from compliance.models import inspec_scan_db, dockle_scan_db
 from projects.models import project_db
-from django.shortcuts import render, render_to_response, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render,  HttpResponse, HttpResponseRedirect
 from itertools import chain
 import datetime
 from webscanners.resources import AllResource
@@ -183,10 +191,22 @@ def proj_data(request):
     all_trivy_scan = trivy_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('total_vuln'))
 
+    all_gitlabsast_scan = gitlabsast_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('total_vuln'))
+
+    all_gitlabcontainerscan_scan = gitlabcontainerscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('total_vuln'))
+
+    all_gitlabsca_scan = gitlabsca_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('total_vuln'))
+
     all_npmaudit_scan = npmaudit_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('total_vuln'))
 
     all_nodejsscan_scan = nodejsscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('total_vuln'))
+
+    all_semgrepscan_scan = semgrepscan_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('total_vuln'))
 
     all_tfsec_scan = tfsec_scan_db.objects.filter(username=username, project_id=project_id). \
@@ -275,6 +295,27 @@ def proj_data(request):
         else:
             all_trivy = value
 
+
+    for key, value in all_gitlabsast_scan.items():
+        if value is None:
+            all_gitlabsast = '0'
+        else:
+            all_gitlabsast = value
+
+
+    for key, value in all_gitlabcontainerscan_scan.items():
+        if value is None:
+            all_gitlabcontainerscan = '0'
+        else:
+            all_gitlabcontainerscan = value
+
+
+    for key, value in all_gitlabsca_scan.items():
+        if value is None:
+            all_gitlabsca = '0'
+        else:
+            all_gitlabsca = value
+
     for key, value in all_npmaudit_scan.items():
         if value is None:
             all_npmaudit = '0'
@@ -286,6 +327,12 @@ def proj_data(request):
             all_nodejsscan = '0'
         else:
             all_nodejsscan = value
+
+    for key, value in all_semgrepscan_scan.items():
+        if value is None:
+            all_semgrepscan = '0'
+        else:
+            all_semgrepscan = value
 
     for key, value in all_tfsec_scan.items():
         if value is None:
@@ -370,8 +417,12 @@ def proj_data(request):
                int(all_findbugs) + \
                int(all_clair) + \
                int(all_trivy) + \
+               int(all_gitlabsast) + \
+               int(all_gitlabcontainerscan) + \
+               int(all_gitlabsca) + \
                int(all_npmaudit) + \
                int(all_nodejsscan) + \
+               int(all_semgrepscan) + \
                int(all_tfsec) + \
                int(all_whitesource) + \
                int(all_checkmarx) + \
@@ -386,7 +437,7 @@ def proj_data(request):
     total_compliance = int(all_inspec) + int(all_dockle)
 
     total_static = int(all_dependency) + int(all_findbugs) + int(all_bandit) + int(all_clair) + int(all_trivy) + int(
-        all_npmaudit) + int(all_nodejsscan) + int(all_tfsec) + int(all_whitesource) + int(all_checkmarx)
+        all_npmaudit) + int(all_nodejsscan) + int(all_semgrepscan) + int(all_tfsec) + int(all_whitesource) + int(all_checkmarx) + int(all_gitlabsast) + int(all_gitlabcontainerscan) + int(all_gitlabsca)
 
     all_zap_high = zap_scans_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('high_vul'))
@@ -417,10 +468,22 @@ def proj_data(request):
     all_trivy_high = trivy_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_HIGH'))
 
+    all_gitlabsast_high = gitlabsast_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_HIGH'))
+
+    all_gitlabcontainerscan_high = gitlabcontainerscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_HIGH'))
+
+    all_gitlabsca_high = gitlabsca_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_HIGH'))
+
     all_npmaudit_high = npmaudit_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_HIGH'))
 
     all_nodejsscan_high = nodejsscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_HIGH'))
+
+    all_semgrepscan_high = semgrepscan_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_HIGH'))
 
     all_tfsec_high = tfsec_scan_db.objects.filter(username=username, project_id=project_id). \
@@ -509,6 +572,24 @@ def proj_data(request):
         else:
             high_trivy = value
 
+    for key, value in all_gitlabsast_high.items():
+        if value is None:
+            high_gitlabsast = '0'
+        else:
+            high_gitlabsast = value
+
+    for key, value in all_gitlabcontainerscan_high.items():
+        if value is None:
+            high_gitlabcontainerscan = '0'
+        else:
+            high_gitlabcontainerscan = value
+
+    for key, value in all_gitlabsca_high.items():
+        if value is None:
+            high_gitlabsca = '0'
+        else:
+            high_gitlabsca = value
+
     for key, value in all_npmaudit_high.items():
         if value is None:
             high_npmaudit = '0'
@@ -520,6 +601,13 @@ def proj_data(request):
             high_nodejsscan = '0'
         else:
             high_nodejsscan = value
+
+
+    for key, value in all_semgrepscan_high.items():
+        if value is None:
+            high_semgrepscan = '0'
+        else:
+            high_semgrepscan = value
 
     for key, value in all_tfsec_high.items():
         if value is None:
@@ -605,8 +693,12 @@ def proj_data(request):
                int(high_findbugs) + \
                int(high_clair) + \
                int(high_trivy) + \
+               int(high_gitlabsast) + \
+               int(high_gitlabcontainerscan) + \
+               int(high_gitlabsca) + \
                int(high_npmaudit) + \
                int(high_nodejsscan) + \
+               int(high_semgrepscan) + \
                int(high_tfsec) + \
                int(high_whitesource) + \
                int(high_checkmarx) + \
@@ -625,9 +717,13 @@ def proj_data(request):
                       int(high_findbugs) + \
                       int(high_bandit) + \
                       int(high_trivy) + \
+                      int(high_gitlabsast) + \
+                      int(high_gitlabcontainerscan) + \
+                      int(high_gitlabsca) + \
                       int(high_clair) + \
                       int(high_npmaudit) + \
                       int(high_nodejsscan) + \
+                      int(high_semgrepscan) + \
                       int(high_tfsec) + \
                       int(high_whitesource) + \
                       int(high_checkmarx)
@@ -665,10 +761,22 @@ def proj_data(request):
     all_trivy_medium = trivy_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_MEDIUM'))
 
+    all_gitlabsast_medium = gitlabsast_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_MEDIUM'))
+
+    all_gitlabcontainerscan_medium = gitlabcontainerscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_MEDIUM'))
+
+    all_gitlabsca_medium = gitlabsca_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_MEDIUM'))
+
     all_npmaudit_medium = npmaudit_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_MEDIUM'))
 
     all_nodejsscan_medium = nodejsscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_MEDIUM'))
+
+    all_semgrepscan_medium = semgrepscan_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_MEDIUM'))
 
     all_tfsec_medium = tfsec_scan_db.objects.filter(username=username, project_id=project_id). \
@@ -753,6 +861,25 @@ def proj_data(request):
         else:
             medium_trivy = value
 
+    for key, value in all_gitlabsast_medium.items():
+        if value is None:
+            medium_gitlabsast = '0'
+        else:
+            medium_gitlabsast = value
+
+
+    for key, value in all_gitlabcontainerscan_medium.items():
+        if value is None:
+            medium_gitlabcontainerscan = '0'
+        else:
+            medium_gitlabcontainerscan = value
+
+    for key, value in all_gitlabsca_medium.items():
+        if value is None:
+            medium_gitlabsca = '0'
+        else:
+            medium_gitlabsca = value
+
     for key, value in all_npmaudit_medium.items():
         if value is None:
             medium_npmaudit = '0'
@@ -764,6 +891,12 @@ def proj_data(request):
             medium_nodejsscan = '0'
         else:
             medium_nodejsscan = value
+
+    for key, value in all_semgrepscan_medium.items():
+        if value is None:
+            medium_semgrepscan = '0'
+        else:
+            medium_semgrepscan = value
 
     for key, value in all_tfsec_medium.items():
         if value is None:
@@ -824,8 +957,12 @@ def proj_data(request):
                  int(medium_findbugs) + \
                  int(medium_clair) + \
                  int(medium_trivy) + \
+                 int(medium_gitlabsast) + \
+                 int(medium_gitlabcontainerscan) + \
+                 int(medium_gitlabsca) + \
                  int(medium_npmaudit) + \
                  int(medium_nodejsscan) + \
+                 int(medium_semgrepscan) + \
                  int(medium_tfsec) + \
                  int(medium_whitesource) + \
                  int(medium_checkmarx) + \
@@ -864,9 +1001,13 @@ def proj_data(request):
                         int(medium_findbugs) + \
                         int(medium_bandit) + \
                         int(medium_trivy) + \
+                        int(medium_gitlabsast) + \
+                        int(medium_gitlabcontainerscan) + \
+                        int(medium_gitlabsca) + \
                         int(medium_clair) + \
                         int(medium_npmaudit) + \
                         int(medium_nodejsscan) + \
+                        int(medium_semgrepscan) + \
                         int(medium_tfsec) + \
                         int(medium_whitesource) + \
                         int(medium_checkmarx)
@@ -904,10 +1045,22 @@ def proj_data(request):
     all_trivy_low = trivy_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_LOW'))
 
+    all_gitlabsast_low = gitlabsast_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_LOW'))
+
+    all_gitlabcontainerscan_low = gitlabcontainerscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_LOW'))
+
+    all_gitlabsca_low = gitlabsca_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_LOW'))
+
     all_npmaudit_low = npmaudit_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_LOW'))
 
     all_nodejsscan_low = nodejsscan_scan_db.objects.filter(username=username, project_id=project_id). \
+        aggregate(Sum('SEVERITY_LOW'))
+
+    all_semgrepscan_low = semgrepscan_scan_db.objects.filter(username=username, project_id=project_id). \
         aggregate(Sum('SEVERITY_LOW'))
 
     all_tfsec_low = tfsec_scan_db.objects.filter(username=username, project_id=project_id). \
@@ -996,6 +1149,24 @@ def proj_data(request):
         else:
             low_trivy = value
 
+    for key, value in all_gitlabsast_low.items():
+        if value is None:
+            low_gitlabsast = '0'
+        else:
+            low_gitlabsast = value
+
+    for key, value in all_gitlabcontainerscan_low.items():
+        if value is None:
+            low_gitlabcontainerscan = '0'
+        else:
+            low_gitlabcontainerscan = value
+
+    for key, value in all_gitlabsca_low.items():
+        if value is None:
+            low_gitlabsca = '0'
+        else:
+            low_gitlabsca = value
+
     for key, value in all_npmaudit_low.items():
         if value is None:
             low_npmaudit = '0'
@@ -1007,6 +1178,12 @@ def proj_data(request):
             low_nodejsscan = '0'
         else:
             low_nodejsscan = value
+
+    for key, value in all_semgrepscan_low.items():
+        if value is None:
+            low_semgrepscan = '0'
+        else:
+            low_semgrepscan = value
 
     for key, value in all_tfsec_low.items():
         if value is None:
@@ -1073,8 +1250,12 @@ def proj_data(request):
               int(low_findbugs) + \
               int(low_clair) + \
               int(low_trivy) + \
+              int(low_gitlabsast) + \
+              int(low_gitlabcontainerscan) + \
+              int(low_gitlabsca) + \
               int(low_npmaudit) + \
               int(low_nodejsscan) + \
+              int(low_semgrepscan) + \
               int(low_tfsec) + \
               int(low_whitesource) + \
               int(low_checkmarx) + \
@@ -1112,9 +1293,13 @@ def proj_data(request):
                      int(low_findbugs) + \
                      int(low_bandit) + \
                      int(low_trivy) + \
+                     int(low_gitlabsast) + \
+                     int(low_gitlabcontainerscan) + \
+                     int(low_gitlabsca) + \
                      int(low_clair) + \
                      int(low_npmaudit) + \
                      int(low_nodejsscan) + \
+                     int(low_semgrepscan) + \
                      int(low_tfsec) + \
                      int(low_whitesource) + \
                      int(low_checkmarx)
@@ -1135,15 +1320,19 @@ def proj_data(request):
     findbugs = findbugs_scan_db.objects.filter(username=username, project_id=project_id)
     clair = clair_scan_db.objects.filter(username=username, project_id=project_id)
     trivy = trivy_scan_db.objects.filter(username=username, project_id=project_id)
+    gitlabsast = gitlabsast_scan_db.objects.filter(username=username, project_id=project_id)
+    gitlabcontainerscan = gitlabcontainerscan_scan_db.objects.filter(username=username, project_id=project_id)
+    gitlabsca = gitlabsca_scan_db.objects.filter(username=username, project_id=project_id)
     npmaudit = npmaudit_scan_db.objects.filter(username=username, project_id=project_id)
     nodejsscan = nodejsscan_scan_db.objects.filter(username=username, project_id=project_id)
+    semgrepscan = semgrepscan_scan_db.objects.filter(username=username, project_id=project_id)
     tfsec = tfsec_scan_db.objects.filter(username=username, project_id=project_id)
     whitesource = whitesource_scan_db.objects.filter(username=username, project_id=project_id)
     checkmarx = checkmarx_scan_db.objects.filter(username=username, project_id=project_id)
     bandit = bandit_scan_db.objects.filter(username=username, project_id=project_id)
 
     web_scan_dat = chain(burp, zap, arachni, webinspect, netsparker, acunetix)
-    static_scan = chain(dependency_check, findbugs, clair, trivy, npmaudit, nodejsscan, tfsec, whitesource, checkmarx, bandit)
+    static_scan = chain(dependency_check, findbugs, clair, trivy, gitlabsast, gitlabcontainerscan, gitlabsca, npmaudit, nodejsscan, semgrepscan, tfsec, whitesource, checkmarx, bandit)
     openvas_dat = scan_save_db.objects.filter(username=username, project_id=project_id)
     nessus_dat = nessus_scan_db.objects.filter(username=username, project_id=project_id)
 
@@ -1185,9 +1374,17 @@ def proj_data(request):
                                                                 project_id=project_id)
     trivy_false_positive = trivy_scan_results_db.objects.filter(username=username, false_positive='Yes',
                                                                 project_id=project_id)
+    gitlabsast_false_positive = gitlabsast_scan_results_db.objects.filter(username=username, false_positive='Yes',
+                                                                project_id=project_id)
+    gitlabcontainerscan_false_positive = gitlabcontainerscan_scan_results_db.objects.filter(username=username, false_positive='Yes',
+                                                                          project_id=project_id)
+    gitlabsca_false_positive = gitlabsca_scan_results_db.objects.filter(username=username, false_positive='Yes',
+                                                                project_id=project_id)
     npmaudit_false_positive = npmaudit_scan_results_db.objects.filter(username=username, false_positive='Yes',
                                                                       project_id=project_id)
     nodejsscan_false_positive = nodejsscan_scan_results_db.objects.filter(username=username, false_positive='Yes',
+                                                                          project_id=project_id)
+    semgrepscan_false_positive = semgrepscan_scan_results_db.objects.filter(username=username, false_positive='Yes',
                                                                           project_id=project_id)
     tfsec_false_positive = tfsec_scan_results_db.objects.filter(username=username, false_positive='Yes',
                                                                 project_id=project_id)
@@ -1227,9 +1424,17 @@ def proj_data(request):
                                                              project_id=project_id)
     trivy_closed_vuln = trivy_scan_results_db.objects.filter(username=username, vuln_status='Closed',
                                                              project_id=project_id)
+    gitlabsast_closed_vuln = gitlabsast_scan_results_db.objects.filter(username=username, vuln_status='Closed',
+                                                             project_id=project_id)
+    gitlabcontainerscan_closed_vuln = gitlabcontainerscan_scan_results_db.objects.filter(username=username, vuln_status='Closed',
+                                                                       project_id=project_id)
+    gitlabsca_closed_vuln = gitlabsca_scan_results_db.objects.filter(username=username, vuln_status='Closed',
+                                                             project_id=project_id)
     npmaudit_closed_vuln = npmaudit_scan_results_db.objects.filter(username=username, vuln_status='Closed',
                                                                    project_id=project_id)
     nodejsscan_closed_vuln = nodejsscan_scan_results_db.objects.filter(username=username, vuln_status='Closed',
+                                                                       project_id=project_id)
+    semgrepscan_closed_vuln = semgrepscan_scan_results_db.objects.filter(username=username, vuln_status='Closed',
                                                                        project_id=project_id)
     tfsec_closed_vuln = tfsec_scan_results_db.objects.filter(username=username, vuln_status='Closed',
                                                              project_id=project_id)
@@ -1254,8 +1459,12 @@ def proj_data(request):
                       int(len(findbugs_closed_vuln)) + \
                       int(len(clair_closed_vuln)) + \
                       int(len(trivy_closed_vuln)) + \
+                      int(len(gitlabsast_closed_vuln)) + \
+                      int(len(gitlabcontainerscan_closed_vuln)) + \
+                      int(len(gitlabsca_closed_vuln)) + \
                       int(len(npmaudit_closed_vuln)) + \
                       int(len(nodejsscan_closed_vuln)) + \
+                      int(len(semgrepscan_closed_vuln)) + \
                       int(len(tfsec_closed_vuln)) + \
                       int(len(whitesource_closed_vuln)) + \
                       int(len(checkmarx_closed_vuln)) + \
@@ -1273,8 +1482,12 @@ def proj_data(request):
                          int(len(findbugs_false_positive)) + \
                          int(len(clair_false_positive)) + \
                          int(len(trivy_false_positive)) + \
+                         int(len(gitlabsast_false_positive)) + \
+                         int(len(gitlabcontainerscan_false_positive)) + \
+                         int(len(gitlabsca_false_positive)) + \
                          int(len(npmaudit_false_positive)) + \
                          int(len(nodejsscan_false_positive)) + \
+                         int(len(semgrepscan_false_positive)) + \
                          int(len(tfsec_false_positive)) + \
                          int(len(whitesource_false_positive)) + \
                          int(len(checkmarx_false_positive)) + \
@@ -1321,8 +1534,12 @@ def proj_data(request):
                    'bandit': bandit,
                    'clair': clair,
                    'trivy': trivy,
+                   'gitlabsast': gitlabsast,
+                   'gitlabcontainerscan': gitlabcontainerscan,
+                   'gitlabsca': gitlabsca,
                    'npmaudit': npmaudit,
                    'nodejsscan': nodejsscan,
+                   'semgrepscan': semgrepscan,
                    'tfsec': tfsec,
                    'whitesource': whitesource,
                    'checkmarx': checkmarx,
@@ -1339,8 +1556,12 @@ def proj_data(request):
                    'all_findbugs_scan': all_findbugs_scan,
                    'all_clair_scan': all_clair_scan,
                    'all_trivy_scan': all_trivy_scan,
+                   'all_gitlabsast_scan': all_gitlabsast_scan,
+                   'all_gitlabcontainerscan_scan': all_gitlabcontainerscan_scan,
+                   'all_gitlabsca_scan': all_gitlabsca_scan,
                    'all_npmaudit_scan': all_npmaudit_scan,
                    'all_nodejsscan_scan': all_nodejsscan_scan,
+                   'all_semgrepscan_scan': all_semgrepscan_scan,
                    'all_tfsec_scan': all_tfsec_scan,
                    'all_whitesource_scan': all_whitesource_scan,
                    'all_checkmarx_scan': all_checkmarx_scan,
@@ -1412,6 +1633,18 @@ def proj_data(request):
                    'all_trivy_low': all_trivy_low,
                    'all_trivy_medium': all_trivy_medium,
 
+                   'all_gitlabsast_high': all_gitlabsast_high,
+                   'all_gitlabsast_low': all_gitlabsast_low,
+                   'all_gitlabsast_medium': all_gitlabsast_medium,
+
+                   'all_gitlabcontainerscan_high': all_gitlabcontainerscan_high,
+                   'all_gitlabcontainerscan_low': all_gitlabcontainerscan_low,
+                   'all_gitlabcontainerscan_medium': all_gitlabcontainerscan_medium,
+
+                   'all_gitlabsca_high': all_gitlabsca_high,
+                   'all_gitlabsca_low': all_gitlabsca_low,
+                   'all_gitlabsca_medium': all_gitlabsca_medium,
+
                    'all_npmaudit_high': all_npmaudit_high,
                    'all_npmaudit_low': all_npmaudit_low,
                    'all_npmaudit_medium': all_npmaudit_medium,
@@ -1419,6 +1652,10 @@ def proj_data(request):
                    'all_nodejsscan_high': all_nodejsscan_high,
                    'all_nodejsscan_low': all_nodejsscan_low,
                    'all_nodejsscan_medium': all_nodejsscan_medium,
+
+                   'all_semgrepscan_high': all_semgrepscan_high,
+                   'all_semgrepscan_low': all_semgrepscan_low,
+                   'all_semgrepscan_medium': all_semgrepscan_medium,
 
                    'all_tfsec_high': all_tfsec_high,
                    'all_tfsec_low': all_tfsec_low,
@@ -1487,11 +1724,25 @@ def all_high_vuln(request):
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='High', project_id=project_id,
                                                               false_positive='No')
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='High', project_id=project_id,
+                                                              false_positive='No')
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='High',
+                                                                        project_id=project_id,
+                                                                        false_positive='No')
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='High', project_id=project_id,
+                                                              false_positive='No')
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='High',
                                                                     project_id=project_id,
                                                                     false_positive='No')
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='High',
+                                                                        project_id=project_id,
+                                                                        false_positive='No')
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='High',
                                                                         project_id=project_id,
                                                                         false_positive='No')
 
@@ -1544,10 +1795,22 @@ def all_high_vuln(request):
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='Medium',
                                                               project_id=project_id)
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                              project_id=project_id)
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                                        project_id=project_id)
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                              project_id=project_id)
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='Medium',
                                                                     project_id=project_id)
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='Medium',
+                                                                        project_id=project_id)
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='Medium',
                                                                         project_id=project_id)
 
         tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, severity='Medium',
@@ -1593,10 +1856,20 @@ def all_high_vuln(request):
 
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='Low', project_id=project_id)
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='Low', project_id=project_id)
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='Low',
+                                                                        project_id=project_id)
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='Low', project_id=project_id)
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='Low',
                                                                     project_id=project_id)
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='Low',
+                                                                        project_id=project_id)
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='Low',
                                                                         project_id=project_id)
 
         tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, severity='Low', project_id=project_id)
@@ -1637,9 +1910,17 @@ def all_high_vuln(request):
 
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id)
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id)
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id)
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id)
 
         tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id)
 
@@ -1680,10 +1961,22 @@ def all_high_vuln(request):
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                               false_positive='Yes')
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                              false_positive='Yes')
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                        false_positive='Yes')
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                              false_positive='Yes')
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                     false_positive='Yes')
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                        false_positive='Yes')
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                         false_positive='Yes')
 
         tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id,
@@ -1730,10 +2023,22 @@ def all_high_vuln(request):
         trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                               vuln_status='Closed')
 
+        gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                              vuln_status='Closed')
+
+        gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                        vuln_status='Closed')
+
+        gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                              vuln_status='Closed')
+
         npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                     vuln_status='Closed')
 
         nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                        vuln_status='Closed')
+
+        semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                         vuln_status='Closed')
 
         tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id,
@@ -1768,8 +2073,12 @@ def all_high_vuln(request):
                    'bandit_all_high': bandit_all_high,
                    'clair_all_high': clair_all_high,
                    'trivy_all_high': trivy_all_high,
+                   'gitlabsast_all_high': gitlabsast_all_high,
+                   'gitlabcontainerscan_all_high': gitlabcontainerscan_all_high,
+                   'gitlabsca_all_high': gitlabsca_all_high,
                    'npmaudit_all_high': npmaudit_all_high,
                    'nodejsscan_all_high': nodejsscan_all_high,
+                   'semgrepscan_all_high': semgrepscan_all_high,
                    'tfsec_all_high': tfsec_all_high,
                    'whitesource_all_high': whitesource_all_high,
                    'checkmarx_all_high': checkmarx_all_high,
@@ -1827,10 +2136,22 @@ def export(request):
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='HIGH',
                                                                   project_id=project_id)
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='HIGH',
+                                                                  project_id=project_id)
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='HIGH',
+                                                                  project_id=project_id)
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='HIGH',
+                                                                            project_id=project_id)
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='HIGH',
                                                                         project_id=project_id)
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='HIGH',
+                                                                            project_id=project_id)
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='HIGH',
                                                                             project_id=project_id)
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, severity='HIGH',
@@ -1859,8 +2180,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
@@ -1900,10 +2225,22 @@ def export(request):
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='Medium',
                                                                   project_id=project_id)
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                                  project_id=project_id)
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                                  project_id=project_id)
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='Medium',
+                                                                            project_id=project_id)
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='Medium',
                                                                         project_id=project_id)
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='Medium',
+                                                                            project_id=project_id)
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='Medium',
                                                                             project_id=project_id)
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, severity='Medium',
@@ -1933,8 +2270,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
@@ -1975,10 +2316,22 @@ def export(request):
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, Severity='Low',
                                                                   project_id=project_id)
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, Severity='Low',
+                                                                  project_id=project_id)
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, Severity='Low',
+                                                                  project_id=project_id)
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, Severity='Low',
+                                                                            project_id=project_id)
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, severity='Low',
                                                                         project_id=project_id)
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, severity='Low',
+                                                                            project_id=project_id)
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, severity='Low',
                                                                             project_id=project_id)
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, severity='Low',
@@ -2005,8 +2358,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
@@ -2044,9 +2401,17 @@ def export(request):
 
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id)
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id)
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id)
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id)
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id)
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id)
 
@@ -2068,8 +2433,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
@@ -2107,10 +2476,22 @@ def export(request):
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                   false_positive='Yes')
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                  false_positive='Yes')
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                  false_positive='Yes')
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                            false_positive='Yes')
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                         false_positive='Yes')
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                            false_positive='Yes')
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                             false_positive='Yes')
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id,
@@ -2137,8 +2518,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
@@ -2174,10 +2559,22 @@ def export(request):
             trivy_all_high = trivy_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                   vuln_status='Closed')
 
+            gitlabsca_all_high = gitlabsca_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                  vuln_status='Closed')
+
+            gitlabsast_all_high = gitlabsast_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                  vuln_status='Closed')
+
+            gitlabcontainerscan_all_high = gitlabcontainerscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                            vuln_status='Closed')
+
             npmaudit_all_high = npmaudit_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                         vuln_status='Closed')
 
             nodejsscan_all_high = nodejsscan_scan_results_db.objects.filter(username=username, project_id=project_id,
+                                                                            vuln_status='Closed')
+
+            semgrepscan_all_high = semgrepscan_scan_results_db.objects.filter(username=username, project_id=project_id,
                                                                             vuln_status='Closed')
 
             tfsec_all_high = tfsec_scan_results_db.objects.filter(username=username, project_id=project_id,
@@ -2204,8 +2601,12 @@ def export(request):
                              findbugs_all_high,
                              clair_all_high,
                              trivy_all_high,
+                             gitlabsast_all_high,
+                             gitlabcontainerscan_all_high,
+                             gitlabsca_all_high,
                              npmaudit_all_high,
                              nodejsscan_all_high,
+                             semgrepscan_all_high,
                              tfsec_all_high,
                              whitesource_all_high,
                              checkmarx_all_high,
