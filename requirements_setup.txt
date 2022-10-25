@@ -60,8 +60,8 @@ python-owasp-zap-v2.4==0.0.13
 python-taint==0.40
 python-whois==0.6.2
 pytz==2017.3
-reportlab
-requests==2.20.0
+reportlab==3.6.6
+requests
 requests-oauthlib==0.8.0
 requests-toolbelt==0.8.0
 selenium==3.8.0
@@ -69,11 +69,12 @@ singledispatch==3.4.0.3
 six==1.11.0
 tinycss2
 uritemplate==3.0.0
-urllib3==1.25
+boto3==1.16.6
+urllib3==1.25.11
 webencodings==0.5.1
 whitenoise==3.3.0
 wrapt==1.10.11
-xhtml2pdf
+xhtml2pdf==0.2.3
 beautifulsoup4==4.7.1
 django-import-export==1.2.0
 django-s3-storage==0.12.4
